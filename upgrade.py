@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+
 import requests
 import attr
+import click
 from datetime import datetime, timedelta
 
 graphurl = "https://hopglass.freifunk.in-kiel.de/graph.json"
@@ -198,12 +201,29 @@ def miauEnforce(graph,tree,targetversion):
     print("deny from all")
     print(f"#Allowed nodes: { num }")
 
+@click.group()
+@click.option('--startnode',type=click.STRING,default="deadbecccc00",help="Node Id of the network center")
+@click.pass_context
+def cli(ctx,startnode):
+    graph = getData()
+    tree = spantree(graph,graph.getGraphIdentFromIdent(startnode))
+    ctx.obj['graph'] = graph
+    ctx.obj['tree'] = tree
+
+@cli.command(name="miauEnforce")
+@click.argument("firmware_version")
+@click.pass_context
+def miau(ctx,firmware_version):
+    graph = ctx.obj['graph']
+    tree = ctx.obj['tree']
+    miauEnforce(graph,tree,firmware_version)
+
+@cli.command(name="outerToInnerUpgrade")
+@click.pass_context
+def otiu(ctx):
+    graph = ctx.obj['graph']
+    tree = ctx.obj['tree']
+    outerToInnerUpgrade(graph,tree)
 
 if __name__ == "__main__":
-
-    graph = getData()
-    startnode = "deadbecccc00"
-    tree = spantree(graph,graph.getGraphIdentFromIdent(startnode))
-
-    outerToInnerUpgrade(graph,tree)
-    miauEnforce(graph,tree,"2018.1.4-612")
+    cli(obj={})
