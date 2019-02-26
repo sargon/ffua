@@ -10,68 +10,77 @@ class Graph:
     """ 
     Simple directed graph.
     """
+
+    @attr.s
+    class GraphNode:
+        arrows_out = attr.ib(factory=dict)
+        arrows_in = attr.ib(factory=dict)
+        ident = attr.ib(default=None)
+        data = attr.ib(default=None)
+
+        def degree(self):
+            return len(self.arrows_in) + len(self.arrows_out)
     
     nodes = attr.ib(factory=dict)
-    g2n = attr.ib(factory=dict) 
-    edgemap = attr.ib(factory=dict)
+    identmap = attr.ib(factory=dict)
 
-    def addEdge(self,s,t,w):
-        self.addNode(s)
-        self.addNode(t)
-        self.edgemap[s][t] = w
+    def addEdge(self,n1,n2,w):
+        self.getNode(n1).arrows_out[n2] = w
+        self.getNode(n2).arrows_in[n1] = w
 
-    def getEdges(self,s):
+    def getOutEdges(self,node):
         try:
-            return self.edgemap[s]
+            return self.getNode(node).arrows_out
         except:
             return None
 
+    def getNode(self,node):
+        if node not in self.nodes:
+            self.nodes[node] = self.GraphNode()
+        return self.nodes[node]
+
     def getNodes(self):
-        return self.edgemap.keys()
+        return self.nodes.keys()
     
-    def addNode(self,n):
-        if n not in self.edgemap:
-            self.edgemap[n] = dict()
+    def setNodeData(self,node,data):
+        self.getNode(node).data = data 
 
-    def setNodeData(self,gid,node_id,nodedata):
-        self.nodes[node_id] = nodedata
-        self.g2n[gid] = node_id
+    def setNodeIdent(self,node,ident):
+        self.getNode(node).ident = ident
+        self.identmap[ident] = node
 
-    def getNodeData(self,gid):
-        return self.nodes[self.g2n[gid]]
+    def getNodeData(self,node):
+        return self.getNode(node).data
 
-    def getNodeDataById(self,node_id):
-        return self.nodes[node_id]
+    def getNodeDataByIdent(self,ident):
+        return self.getNode(self.getGraphIdentFromIdent(ident)).data
 
-    def getGraphIdFromNodeId(self,node_id):
-        for gid,nid in self.g2n.items():
-            if nid == node_id:
-                return gid
-        raise Exception(f"No graph ident for node_id { node_id }")
+    def getGraphIdentFromIdent(self,ident):
+        try:
+            return self.identmap[ident]
+        except:
+            raise Exception(f"No graph ident for node_id { node_id }")
 
     def hasNode(self,n):
-        return n in self.edgemap
+        return n in self.nodes
 
     def numNodes(self):
-        return len(self.edgemap)
-
-    def numEdges(self):
-        return sum([len(node) for node in self.edgemap.values()])
+        return len(self.nodes)
 
 
 def spantree(graph,start):
     tree = Graph()
     if not graph.hasNode(start):
        raise Exception(f"Node {start} not in graph")
-    tree.addNode(start)
+    tree.getNode(start)
     maxweight = 0
-    tree.setNodeData(start,start,0)
+    tree.setNodeData(start,0)
     nextnodes = [(start,0)]
     for node,weight in nextnodes:
-        for target,_ in graph.getEdges(node).items():
+        for target,_ in graph.getOutEdges(node).items():
             if not tree.hasNode(target):
                 tree.addEdge(node,target,weight + 1)
-                tree.setNodeData(target,target,weight + 1)
+                tree.setNodeData(target,weight + 1)
                 maxweight = max(maxweight,weight + 1)
                 nextnodes.append((target,weight+1))
     print(f"# Depth: {maxweight}")
@@ -85,7 +94,7 @@ def getLeafs(tree):
     leafs = list()
     for node in tree.getNodes():
         # Leafs have no outgoing edges in our data model
-        if len(tree.getEdges(node)) == 0:
+        if tree.getNode(node).degree() == 1:
             leafs.append(node)
     return leafs
 
@@ -114,10 +123,11 @@ def getData():
         for node in jgraph['batadv']['nodes']:
             if "node_id" in node:
                 node_id = node['node_id']
-                graph.setNodeData(cnt,node_id,nodemap[node_id])
+                graph.setNodeData(cnt,nodemap[node_id])
+                graph.setNodeIdent(cnt,node_id)
             else:
                 node_id = node['id'].replace(':','')
-                graph.setNodeData(cnt,node_id,None)
+                graph.setNodeIdent(cnt,node_id)
             cnt = cnt + 1
         for link in jgraph['batadv']['links']:
             graph.addEdge(link['source'],link['target'],link['tq'])
@@ -147,12 +157,12 @@ def outerToInnerUpgrade():
     print("order allow,deny")
     for node in tree.getNodes():
 
-        if len(tree.getEdges(node)) == 0:
+        if tree.getNode(node).degree() == 1:
             nodedata = graph.getNodeData(node)
             htAllowNode(nodedata)
         else:
             childs_active = False
-            for gchild,_ in tree.getEdges(node).items():
+            for gchild,_ in tree.getOutEdges(node).items():
                 child = graph.getNodeData(gchild)
                 lastseen =  datetime.strptime(child['lastseen'][0:18],"%Y-%m-%dT%H:%M:%S")
                 now = datetime.utcnow()
