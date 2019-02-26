@@ -143,16 +143,11 @@ def htAllowNode(node):
     for address in node['nodeinfo']['network']['addresses']:
         print(f"allow from { address }")
 
-def outerToInnerUpgrade():
+def outerToInnerUpgrade(graph,tree):
     """
     Allow updates only for the leafs of the spantree of the network graph.
     Except for the situation where every child of a node is inactive.
     """
-
-    graph = getData()
-
-    startnode = "deadbecccc00"
-    tree = spantree(graph,graph.getGraphIdFromNodeId(startnode))
     
     print("order allow,deny")
     for node in tree.getNodes():
@@ -176,16 +171,11 @@ def outerToInnerUpgrade():
     print(f"#Tree leafs: { len(getLeafs(tree)) }")
 
 
-def miauEnforce(targetversion):
+def miauEnforce(graph,tree,targetversion):
     """
     Enforce miau usage by allowing all nodes with distance less equal to two
     the update and every node already running the right version.
     """
-
-    graph = getData()
-
-    startnode = "deadbecccc00"
-    tree = spantree(graph,graph.getGraphIdFromNodeId(startnode))
 
     print("order allow,deny")
     num = 0
@@ -210,5 +200,10 @@ def miauEnforce(targetversion):
 
 
 if __name__ == "__main__":
-    # outerToInnerUpgrade()
-    miauEnforce("2018.1.4-612")
+
+    graph = getData()
+    startnode = "deadbecccc00"
+    tree = spantree(graph,graph.getGraphIdentFromIdent(startnode))
+
+    outerToInnerUpgrade(graph,tree)
+    miauEnforce(graph,tree,"2018.1.4-612")
