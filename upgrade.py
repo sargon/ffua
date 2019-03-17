@@ -53,6 +53,7 @@ def miauEnforce(graph,tree,targetversion,min_distance=2):
     running the right version.
     """
 
+
     print("order allow,deny")
     num = 0
     for node in tree.getNodes():
@@ -88,8 +89,10 @@ def cli(ctx,startnode,hopglass):
         for sn in startnode:
             nodeid = graph.getGraphIdentFromIdent(sn)
             graph.addEdge(startident,nodeid,[])
+        ctx.obj['virtual_rootnode'] = True
     else:
         startident = graph.getGraphIdentFromIdent(startnode[0])
+        ctx.obj['virtual_rootnode'] = False
     tree = spantree(graph,startident)
     ctx.obj['graph'] = graph
     ctx.obj['tree'] = tree
