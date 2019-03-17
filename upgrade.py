@@ -87,8 +87,15 @@ def cli(ctx,startnode,hopglass):
         startident = graph.numNodes()
         graph.setNodeIdent(startident,"_VIRTUAL")
         for sn in startnode:
-            nodeid = graph.getGraphIdentFromIdent(sn)
-            graph.addEdge(startident,nodeid,[])
+            num = 0
+            try:
+                nodeid = graph.getGraphIdentFromIdent(sn)
+                graph.addEdge(startident,nodeid,[])
+                num += 1
+            except:
+                logging.warning(f"Node { sn } node found in network graph")
+        if num == 0:
+            raise Exception("No available startnode given")
         ctx.obj['virtual_rootnode'] = True
     else:
         startident = graph.getGraphIdentFromIdent(startnode[0])
