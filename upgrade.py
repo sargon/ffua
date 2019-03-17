@@ -21,24 +21,23 @@ def outerToInnerUpgrade(graph,tree):
     Allow updates only for the leafs of the spantree of the network graph.
     Except for the situation where every child of a node is inactive.
     """
+
+    def has_active_childs(node):
+        for gchild,_ in tree.getOutEdges(node).items():
+            child = graph.getNodeData(gchild)
+            lastseen =  datetime.strptime(child['lastseen'][0:18],"%Y-%m-%dT%H:%M:%S")
+            now = datetime.utcnow()
+            if now - lastseen < timedelta(minutes=30):
+                return True
+        return False
     
     print("order allow,deny")
     for node in tree.getNodes():
-
+        nodedata = graph.getNodeData(node)
         if tree.getNode(node).degree() == 1:
-            nodedata = graph.getNodeData(node)
             htAllowNode(nodedata)
-        else:
-            childs_active = False
-            for gchild,_ in tree.getOutEdges(node).items():
-                child = graph.getNodeData(gchild)
-                lastseen =  datetime.strptime(child['lastseen'][0:18],"%Y-%m-%dT%H:%M:%S")
-                now = datetime.utcnow()
-                if now - lastseen < timedelta(minutes=30):
-                    childs_active = True
-            if not childs_active:
-                nodedata = graph.getNodeData(node)
-                htAllowNode(nodedata)
+        elif not has_active_childs(node):
+            htAllowNode(nodedata)
 
     print("deny from all")
     print(f"#Tree leafs: { len(getLeafs(tree)) }")
