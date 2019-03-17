@@ -34,10 +34,13 @@ def outerToInnerUpgrade(graph,tree):
     print("order allow,deny")
     for node in tree.getNodes():
         nodedata = graph.getNodeData(node)
-        if tree.getNode(node).degree() == 1:
-            htAllowNode(nodedata)
-        elif not has_active_childs(node):
-            htAllowNode(nodedata)
+        try:
+            if tree.getNode(node).degree() == 1:
+                htAllowNode(nodedata)
+            elif not has_active_childs(node):
+                htAllowNode(nodedata)
+        except:
+            pass
 
     print("deny from all")
     print(f"#Tree leafs: { len(getLeafs(tree)) }")
