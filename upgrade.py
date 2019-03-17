@@ -16,6 +16,19 @@ def htAllowNode(node):
     for address in node['nodeinfo']['network']['addresses']:
         print(f"allow from { address }")
 
+def generateHtAccessRules(generator):
+    
+    print("order deny,allow")
+    num = 0
+    for nodedata in generator:
+        try:
+            htAllowNode(nodedata)
+            num = num + 1
+        except:
+            pass
+    print("deny from all")
+    print(f"#Allowed nodes: { num }")
+
 def outerToInnerUpgrade(graph,tree):
     """
     Allow updates only for the leafs of the spantree of the network graph.
@@ -31,20 +44,15 @@ def outerToInnerUpgrade(graph,tree):
                 return True
         return False
     
-    print("order deny,allow")
     for node in tree.getNodes():
         nodedata = graph.getNodeData(node)
         try:
             if tree.getNode(node).degree() == 1:
-                htAllowNode(nodedata)
+                yield nodedata
             elif not has_active_childs(node):
-                htAllowNode(nodedata)
+                yield nodedata
         except:
             pass
-
-    print("deny from all")
-    print(f"#Tree leafs: { len(getLeafs(tree)) }")
-
 
 def miauEnforce(graph,tree,targetversion,min_distance=2):
     """
@@ -53,26 +61,18 @@ def miauEnforce(graph,tree,targetversion,min_distance=2):
     running the right version.
     """
 
-
-    print("order deny,allow")
-    num = 0
     for node in tree.getNodes():
         distance = tree.getNodeData(node)
         nodedata = graph.getNodeData(node)
         try:
             if distance <= min_distance:
-                htAllowNode(nodedata)
-                num = num + 1
+                yield nodedata
             elif distance > min_distance:
                 version = nodedata['nodeinfo']['software']['firmware']['release']
                 if version == targetversion:
-                    htAllowNode(nodedata)
-                    num = num + 1
+                    yield nodedata
         except:
             pass
-
-    print("deny from all")
-    print(f"#Allowed nodes: { num }")
 
 @click.group()
 @click.option('--startnode','-s',type=click.STRING,default="deadbecccc00",help="Node Id of the network center",multiple=True)
@@ -106,14 +106,17 @@ def miau(ctx,min_distance,firmware_version):
     tree = ctx.obj['tree']
     if ctx.obj['virtual_rootnode']:
         min_distance += 1
-    miauEnforce(graph,tree,firmware_version,min_distance)
+    generator = miauEnforce(graph,tree,firmware_version,min_distance)
+    generateHtAccessRules(generator)
+    
 
 @cli.command(name="outerToInnerUpgrade")
 @click.pass_context
 def otiu(ctx):
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
-    outerToInnerUpgrade(graph,tree)
+    generator = outerToInnerUpgrade(graph,tree)
+    generateHtAccessRules(generator)
 
 if __name__ == "__main__":
     cli(obj={})
