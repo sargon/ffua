@@ -31,7 +31,7 @@ def outerToInnerUpgrade(graph,tree):
                 return True
         return False
     
-    print("order allow,deny")
+    print("order deny,allow")
     for node in tree.getNodes():
         nodedata = graph.getNodeData(node)
         try:
