@@ -55,19 +55,18 @@ def miauEnforce(graph,tree,targetversion,min_distance=2):
     num = 0
     for node in tree.getNodes():
         distance = tree.getNodeData(node)
-        if distance <= min_distance:
-            nodedata = graph.getNodeData(node)
-            htAllowNode(nodedata)
-            num = num + 1
-        elif distance > min_distance:
-            nodedata = graph.getNodeData(node)
-            try:
+        nodedata = graph.getNodeData(node)
+        try:
+            if distance <= min_distance:
+                htAllowNode(nodedata)
+                num = num + 1
+            elif distance > min_distance:
                 version = nodedata['nodeinfo']['software']['firmware']['release']
                 if version == targetversion:
                     htAllowNode(nodedata)
                     num = num + 1
-            except:
-                pass
+        except:
+            pass
 
     print("deny from all")
     print(f"#Allowed nodes: { num }")
