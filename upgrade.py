@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-import requests
 import click
 from datetime import datetime, timedelta
+import logging
+import requests
+
 from ffua.graph import Graph,spantree,getLeafs
 from ffua.hopglass import getDataFromHopGlass
 
