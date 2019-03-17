@@ -98,12 +98,15 @@ def cli(ctx,startnode,hopglass):
     ctx.obj['tree'] = tree
 
 @cli.command(name="miauEnforce")
+@click.option("--min-distance","-d",type=click.INT,default=2)
 @click.argument("firmware_version")
 @click.pass_context
-def miau(ctx,firmware_version):
+def miau(ctx,min_distance,firmware_version):
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
-    miauEnforce(graph,tree,firmware_version)
+    if ctx.obj['virtual_rootnode']:
+        min_distance += 1
+    miauEnforce(graph,tree,firmware_version,min_distance)
 
 @cli.command(name="outerToInnerUpgrade")
 @click.pass_context
