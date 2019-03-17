@@ -75,7 +75,7 @@ def miauEnforce(graph,tree,targetversion,min_distance=2):
     print(f"#Allowed nodes: { num }")
 
 @click.group()
-@click.option('--startnode',type=click.STRING,default="deadbecccc00",help="Node Id of the network center",multiple=True)
+@click.option('--startnode','-s',type=click.STRING,default="deadbecccc00",help="Node Id of the network center",multiple=True)
 @click.option('--hopglass',type=click.STRING,default="https://hopglass.freifunk.in-kiel.de/",help="URL to hopglass instance")
 @click.pass_context
 def cli(ctx,startnode,hopglass):
