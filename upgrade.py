@@ -54,7 +54,7 @@ def miauEnforce(graph,tree,targetversion,min_distance=2):
     """
 
 
-    print("order allow,deny")
+    print("order deny,allow")
     num = 0
     for node in tree.getNodes():
         distance = tree.getNodeData(node)
