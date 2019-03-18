@@ -114,7 +114,7 @@ def cli(ctx,startnode,hopglass):
 def miau(ctx,min_distance,manifest_path):
     manifest = parse_manifest(manifest_path)
     firmware_version = manifest.getFirmwareVersion().pop()
-    print(firmware_version)
+    print(f"#Tracking firmware version: { firmware_version }")
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
     if ctx.obj['virtual_rootnode']:
