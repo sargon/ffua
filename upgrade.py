@@ -74,6 +74,7 @@ def miauEnforce(graph,tree,targetbranch,targetversion,min_distance=2):
                 version = nodedata['nodeinfo']['software']['firmware']['release']
                 if version == targetversion:
                     yield nodedata
+                    continue
                 branch = node['nodeinfo']['software']['autoupdater']['branch']
                 if branch != targetbranch:
                     yield nodedata
