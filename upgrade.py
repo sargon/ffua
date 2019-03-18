@@ -57,7 +57,7 @@ def outerToInnerUpgrade(graph,tree):
         except:
             pass
 
-def miauEnforce(graph,tree,targetversion,min_distance=2):
+def miauEnforce(graph,tree,targetbranch,targetversion,min_distance=2):
     """
     Enforce miau usage by allowing all nodes with distance less 
     equal to min_distance the update and every node already 
@@ -73,6 +73,9 @@ def miauEnforce(graph,tree,targetversion,min_distance=2):
             elif distance > min_distance:
                 version = nodedata['nodeinfo']['software']['firmware']['release']
                 if version == targetversion:
+                    yield nodedata
+                branch = node['nodeinfo']['software']['autoupdater']['branch']
+                if branch != targetbranch:
                     yield nodedata
         except:
             pass
@@ -114,12 +117,13 @@ def cli(ctx,startnode,hopglass):
 def miau(ctx,min_distance,manifest_path):
     manifest = parse_manifest(manifest_path)
     firmware_version = manifest.getFirmwareVersion().pop()
+    firmware_branch = manifest.branch
     print(f"#Tracking firmware version: { firmware_version }")
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
     if ctx.obj['virtual_rootnode']:
         min_distance += 1
-    generator = miauEnforce(graph,tree,firmware_version,min_distance)
+    generator = miauEnforce(graph,tree,firmware_branch,firmware_version,min_distance)
     generateHtAccessRules(generator)
     
 
