@@ -7,6 +7,7 @@ import requests
 
 from ffua.graph import Graph,spantree,getLeafs
 from ffua.hopglass import getDataFromHopGlass
+from ffua.manifest import parse_manifest
 
 
 def htAllowNode(node):
@@ -108,9 +109,12 @@ def cli(ctx,startnode,hopglass):
 
 @cli.command(name="miauEnforce")
 @click.option("--min-distance","-d",type=click.INT,default=2)
-@click.argument("firmware_version")
+@click.argument("manifest_path",type=click.Path(exists=True,dir_okay=False))
 @click.pass_context
-def miau(ctx,min_distance,firmware_version):
+def miau(ctx,min_distance,manifest_path):
+    manifest = parse_manifest(manifest_path)
+    firmware_version = manifest.getFirmwareVersion().pop()
+    print(firmware_version)
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
     if ctx.obj['virtual_rootnode']:
