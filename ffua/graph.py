@@ -78,7 +78,6 @@ def spantree(graph,start):
                 tree.setNodeData(target,weight + 1)
                 maxweight = max(maxweight,weight + 1)
                 nextnodes.append((target,weight+1))
-    print(f"# Depth: {maxweight}")
     return tree
 
 def getLeafs(tree):

@@ -84,8 +84,9 @@ def miauEnforce(graph,tree,targetbranch,targetversion,min_distance=2):
 @click.group()
 @click.option('--startnode','-s',type=click.STRING,default="deadbecccc00",help="Node Id of the network center",multiple=True)
 @click.option('--hopglass',type=click.STRING,default="https://hopglass.freifunk.in-kiel.de/",help="URL to hopglass instance")
+@click.option('--output','-o',type=click.File(mode='w'),default=sys.stdout)
 @click.pass_context
-def cli(ctx,startnode,hopglass):
+def cli(ctx,startnode,hopglass,output):
     graph = getDataFromHopGlass(hopglass)
     if len(startnode) > 1:
         """
@@ -110,6 +111,7 @@ def cli(ctx,startnode,hopglass):
     tree = spantree(graph,startident)
     ctx.obj['graph'] = graph
     ctx.obj['tree'] = tree
+    ctx.obj['output'] = output
 
 @cli.command(name="miauEnforce")
 @click.option("--min-distance","-d",type=click.INT,default=2)
@@ -119,13 +121,13 @@ def miau(ctx,min_distance,manifest_path):
     manifest = parse_manifest(manifest_path)
     firmware_version = manifest.getFirmwareVersion().pop()
     firmware_branch = manifest.branch
-    print(f"#Tracking firmware version: { firmware_version }")
+    print(f"#Tracking firmware version: { firmware_version }",file=ctx.obj['output'])
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
     if ctx.obj['virtual_rootnode']:
         min_distance += 1
     generator = miauEnforce(graph,tree,firmware_branch,firmware_version,min_distance)
-    generateHtAccessRules(generator,output=sys.stdout)
+    generateHtAccessRules(generator,ctx.obj['output'])
     
 
 @cli.command(name="outerToInnerUpgrade")
@@ -134,7 +136,7 @@ def otiu(ctx):
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
     generator = outerToInnerUpgrade(graph,tree)
-    generateHtAccessRules(generator,output=sys.stdout)
+    generateHtAccessRules(generator,ctx.obj['output'])
 
 if __name__ == "__main__":
     cli(obj={})
