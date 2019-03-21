@@ -4,33 +4,33 @@ import click
 from datetime import datetime, timedelta
 import logging
 import requests
+import sys
 
 from ffua.graph import Graph,spantree,getLeafs
 from ffua.hopglass import getDataFromHopGlass
 from ffua.manifest import parse_manifest
 
-
-def htAllowNode(node):
-    print(f"# { node['nodeinfo']['hostname'] }")
-    print(f"# { node['nodeinfo']['software']['firmware']['release'] }")
+def htAllowNode(node,output):
+    print(f"# { node['nodeinfo']['hostname'] }",file=output)
+    print(f"# { node['nodeinfo']['software']['firmware']['release'] }",file=output)
     if "autoupdater" in node['nodeinfo']['software']:
         if "branch" in node['nodeinfo']['software']['autoupdater']:
-            print(f"# { node['nodeinfo']['software']['autoupdater']['branch'] }")
+            print(f"# { node['nodeinfo']['software']['autoupdater']['branch'] }",file=output)
     for address in node['nodeinfo']['network']['addresses']:
-        print(f"allow from { address }")
+        print(f"allow from { address }",file=output)
 
-def generateHtAccessRules(generator):
+def generateHtAccessRules(generator,output):
     
-    print("order deny,allow")
+    print("order deny,allow",file=output)
     num = 0
     for nodedata in generator:
         try:
-            htAllowNode(nodedata)
+            htAllowNode(nodedata,output)
             num = num + 1
         except:
             pass
-    print("deny from all")
-    print(f"#Allowed nodes: { num }")
+    print("deny from all",file=output)
+    print(f"#Allowed nodes: { num }",file=output)
 
 def outerToInnerUpgrade(graph,tree):
     """
@@ -125,7 +125,7 @@ def miau(ctx,min_distance,manifest_path):
     if ctx.obj['virtual_rootnode']:
         min_distance += 1
     generator = miauEnforce(graph,tree,firmware_branch,firmware_version,min_distance)
-    generateHtAccessRules(generator)
+    generateHtAccessRules(generator,output=sys.stdout)
     
 
 @cli.command(name="outerToInnerUpgrade")
@@ -134,7 +134,7 @@ def otiu(ctx):
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
     generator = outerToInnerUpgrade(graph,tree)
-    generateHtAccessRules(generator)
+    generateHtAccessRules(generator,output=sys.stdout)
 
 if __name__ == "__main__":
     cli(obj={})
