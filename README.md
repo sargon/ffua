@@ -8,7 +8,7 @@ by applied whitelist mechanism.
 
 ### Example Execution
 
-    ./upgrade.py -s deadbeefff00 -s deadbeefff01 -s deadbeefff06 miauEnforce -d 1 2018.1.4~ngly-606
+    ./upgrade.py -s deadbeefff00 -s deadbeefff01 -s deadbeefff06 -o /path/to/sysupgrade/.htaccess miauEnforce -d 1 2018.1.4~ngly-606
 
 ## Available whitelist mechanisms
 
