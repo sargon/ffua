@@ -24,8 +24,8 @@ def cli(ctx,startnode,hopglass,output):
         """
         startident = graph.numNodes()
         graph.setNodeIdent(startident,"_VIRTUAL")
+        num = 0
         for sn in startnode:
-            num = 0
             try:
                 nodeid = graph.getGraphIdentFromIdent(sn)
                 graph.addEdge(startident,nodeid,[])
