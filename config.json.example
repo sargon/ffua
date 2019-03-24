@@ -1,0 +1,12 @@
+{ "hopglass": "https://hopglass.freifunk.in-kiel.de/",
+  "startnodes": [ 
+    "deadbeefff00",
+    "deadbeefff01", 
+    "deadbeefff02",
+    "deadbeefff03",
+    "deadbeefff04",
+    "deadbeefff05",
+    "deadbeefff06",
+    "deadbeefff07"
+  ]
+}

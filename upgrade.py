@@ -4,6 +4,7 @@ import click
 import logging
 import requests
 import sys
+import json
 
 from ffua.graph import Graph,spantree,getLeafs
 from ffua.hopglass import getDataFromHopGlass
@@ -15,8 +16,15 @@ from ffua.htaccess import generateHtAccessRules
 @click.option('--startnode','-s',type=click.STRING,default=["deadbecccc00"],help="Node Id of the network center",multiple=True)
 @click.option('--hopglass',type=click.STRING,default="https://hopglass.freifunk.in-kiel.de/",help="URL to hopglass instance")
 @click.option('--output','-o',type=click.File(mode='w'),default=sys.stdout)
+@click.option('--config','-c',type=click.File(mode='r'),default=None)
 @click.pass_context
-def cli(ctx,startnode,hopglass,output):
+def cli(ctx,startnode,hopglass,output,config):
+    if config is not None:
+        config_map = json.load(config)
+        if "hopglass" in config_map:
+            hopglass = config_map['hopglass']
+        if "startnodes" in config_map:
+            startnode = config_map['startnodes']
     graph = getDataFromHopGlass(hopglass)
     if len(startnode) > 1:
         """
