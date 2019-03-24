@@ -4,30 +4,25 @@ import click
 import logging
 import requests
 import sys
-import json
 
 from ffua.graph import Graph,spantree,getLeafs
 from ffua.hopglass import getDataFromHopGlass
 from ffua.manifest import parse_manifest
 from ffua.mechanism import outerToInnerUpgrade, miauEnforce
 from ffua.htaccess import generateHtAccessRules
+from ffua.config import Config
 
 @click.group()
 @click.option('--output','-o',type=click.File(mode='w'),default=sys.stdout)
-@click.option('--config','-c',type=click.File(mode='r'),prompt=True)
+@click.option('--config','-c','config_file',type=click.File(mode='r'),prompt=True)
 @click.pass_context
-def cli(ctx,output,config):
-    config_map = json.load(config)
-    if "hopglass" in config_map:
-        hopglass = config_map['hopglass']
-    else:
-        logging.error("No hopglass uri defined")
-        raise click.Abort()
-    if "startnodes" in config_map:
-        startnode = config_map['startnodes']
-    else:
-        logging.error("No startnodes definied")
-        raise click.Abort()
+def cli(ctx,output,config_file):
+
+    config = Config()
+    config.load(config_file)
+    hopglass = config.hopglass
+    startnode = config.startnodes
+
     graph = getDataFromHopGlass(hopglass)
     if len(startnode) > 1:
         """
