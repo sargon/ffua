@@ -9,7 +9,7 @@ class Config:
     hopglass = attr.ib(default="http://localhost:4000/")
     startnodes = attr.ib(factory=list)
     firmware_path = attr.ib(default=Path("/opt/firmware/"))
-    branches = attr.ib(factory=list)
+    branches = attr.ib(factory=dict)
 
     def load(self,config_file):
         config = json.load(config_file)
