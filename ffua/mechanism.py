@@ -25,7 +25,7 @@ def outerToInnerUpgrade(graph,tree):
         except:
             pass
 
-def miauEnforce(graph,tree,targetbranch,targetversion,min_distance=2):
+def miauEnforce(graph,tree,targetfirmwares,min_distance=2):
     """
     Enforce miau usage by allowing all nodes with distance less 
     equal to min_distance the update and every node already 
@@ -40,11 +40,11 @@ def miauEnforce(graph,tree,targetbranch,targetversion,min_distance=2):
                 yield nodedata
             elif distance > min_distance:
                 version = nodedata['nodeinfo']['software']['firmware']['release']
-                if version == targetversion:
+                if version in [ v for _,v in targetversions ]:
                     yield nodedata
                     continue
                 branch = node['nodeinfo']['software']['autoupdater']['branch']
-                if branch != targetbranch:
+                if branch not in [ b for b, _ in targetversions ]:
                     yield nodedata
         except:
             pass

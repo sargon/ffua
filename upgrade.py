@@ -43,24 +43,22 @@ def cli(ctx, output, config_file):
         startident = graph.getGraphIdentFromIdent(startnode[0])
         ctx.obj['virtual_rootnode'] = False
     tree = spantree(graph, startident)
+    ctx.obj['config'] = config
     ctx.obj['graph'] = graph
     ctx.obj['tree'] = tree
     ctx.obj['output'] = output
 
 @cli.command(name="miauEnforce")
 @click.option("--min-distance", "-d", type=click.INT, default=2)
-@click.argument("manifest_path", type=click.Path(exists=True, dir_okay=False))
 @click.pass_context
-def miau(ctx, min_distance, manifest_path):
-    manifest = parse_manifest(manifest_path)
-    firmware_version = manifest.getFirmwareVersion().pop()
-    firmware_branch = manifest.branch
-    print(f"#Tracking firmware version: { firmware_version }", file=ctx.obj['output'])
+def miau(ctx, min_distance):
+    firmware = [ (brn,brn.getFirmwareVersion().pop()) for brn in ctx.obj['config'].branches]
+    print(f"#Tracking firmware version: { firmware }", file=ctx.obj['output'])
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
     if ctx.obj['virtual_rootnode']:
         min_distance += 1
-    generator = miauEnforce(graph, tree, firmware_branch, firmware_version, min_distance)
+    generator = miauEnforce(graph, tree, firmware, min_distance)
     generateHtAccessRules(generator, ctx.obj['output'])
 
 
