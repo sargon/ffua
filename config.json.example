@@ -8,5 +8,9 @@
     "deadbeefff05",
     "deadbeefff06",
     "deadbeefff07"
+  ],
+  "firmware_path": "/opt/firmware/",
+  "branches": [
+    "stable"
   ]
 }
