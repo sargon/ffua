@@ -52,7 +52,7 @@ def cli(ctx, output, config_file):
 @click.option("--min-distance", "-d", type=click.INT, default=2)
 @click.pass_context
 def miau(ctx, min_distance):
-    firmware = [ (brn,brn.getFirmwareVersion().pop()) for brn in ctx.obj['config'].branches]
+    firmware = [ (name,brn.getFirmwareVersion().pop()) for name,brn in ctx.obj['config'].branches.items()]
     print(f"#Tracking firmware version: { firmware }", file=ctx.obj['output'])
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
