@@ -32,6 +32,8 @@ def miauEnforce(graph,tree,targetfirmwares,min_distance=2):
     running the right version.
     """
 
+    targetversions = [ v for _,v in targetfirmwares ]
+
     for node in tree.getNodes():
         distance = tree.getNodeData(node)
         nodedata = graph.getNodeData(node)
@@ -40,7 +42,7 @@ def miauEnforce(graph,tree,targetfirmwares,min_distance=2):
                 yield nodedata
             elif distance > min_distance:
                 version = nodedata['nodeinfo']['software']['firmware']['release']
-                if version in [ v for _,v in targetversions ]:
+                if version in targetversions:
                     yield nodedata
                     continue
                 branch = node['nodeinfo']['software']['autoupdater']['branch']
