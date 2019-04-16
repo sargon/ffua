@@ -3,6 +3,25 @@
 import click
 import attr
 from pathlib import Path
+from enum import auto,Enum
+
+import ffua
+
+class RequestType(Enum):
+    Firmware = auto()
+    Manifest = auto()
+
+@attr.s(auto_attribs=True)
+class Request:
+    type: RequestType
+    source: str
+    method: str
+    branch: str
+    filename: str
+
+def parse_logfile(logfile,*args,**kargs):
+    for line in logfile.readlines():
+        yield parse_logline(line,*args,**kargs)
 
 def parse_logline(line,with_manifest = False):
     try:
@@ -18,27 +37,37 @@ def parse_logline(line,with_manifest = False):
                 branch = path.parent.parent.name
                 if path.suffix == ".manifest":
                     if with_manifest:
-                        print(address,"manifest",branch)
+                        return Request(RequestType.Manifest,address,method,branch,path.name)
                 else:
                     filename = path.name
-                    print(address,"firmware",branch,filename)
+                    return Request(RequestType.Firmware,address,method,branch,path.name)
 
     except:
-        pass
+        return None
 
-@click.command()
+@click.group()
+@click.option('--config','-c','config_file',type=click.File(mode='w'),prompt=True)
+@click.pass_context
+def cli(ctx,config_file):
+    ctx.obj['config'] = ffua.config.Config(config_file)
+
+
+@cli.command()
 @click.option("--with-manifest/--without-manifest",default=False,help="Output manifest requests")
 @click.argument("logfiles",type=click.File(mode='r+'),nargs=-1)
-def cli(with_manifest,logfiles):
+def parse(with_manifest,logfiles):
     print("Start reading")
-    while True:
-        for logfile in logfiles:
+    for logfile in logfiles:
+        for request in parse_logfile(logfile,with_manifest):
+            if request is not None:
+                print(request.source,request.type,request.branch,request.filename)
 
-            line = logfile.readline()
-            if line is not None and len(line) > 0:
-                parse_logline(line,with_manifest)
-            else:
-                exit(1)
+@cli.command()
+@click.argument("logfiles",type=click.File(mode='r+'),nargs=-1)
+@click.pass_context
+def verify(logfiles):
+    graph = ffua.graph.getDataFromHopGlass(hopglass)
+
 
 if __name__ == "__main__":
-    cli()
+    cli(obj=dict())
