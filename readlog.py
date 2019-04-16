@@ -28,15 +28,17 @@ def parse_logline(line,with_manifest = False):
 
 @click.command()
 @click.option("--with-manifest/--without-manifest",default=False,help="Output manifest requests")
-@click.argument("logfile",type=click.File(mode='r+'))
-def cli(with_manifest,logfile):
+@click.argument("logfiles",type=click.File(mode='r+'),nargs=-1)
+def cli(with_manifest,logfiles):
     print("Start reading")
     while True:
-        line = logfile.readline()
-        if line is not None and len(line) > 0:
-            parse_logline(line,with_manifest)
-        else:
-            exit(1)
+        for logfile in logfiles:
+
+            line = logfile.readline()
+            if line is not None and len(line) > 0:
+                parse_logline(line,with_manifest)
+            else:
+                exit(1)
 
 if __name__ == "__main__":
     cli()
