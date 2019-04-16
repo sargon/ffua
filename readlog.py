@@ -46,7 +46,7 @@ def parse_logline(line,with_manifest = False):
         return None
 
 @click.group()
-@click.option('--config','-c','config_file',type=click.File(mode='w'),prompt=True)
+@click.option('--config','-c','config_file',type=click.File(mode='r'),prompt=True)
 @click.pass_context
 def cli(ctx,config_file):
     ctx.obj['config'] = ffua.config.Config(config_file)
