@@ -8,7 +8,11 @@ by applied whitelist mechanism.
 
 ### Example Execution
 
-    ./upgrade.py -s deadbeefff00 -s deadbeefff01 -s deadbeefff06 -o /path/to/sysupgrade/.htaccess miauEnforce -d 1 2018.1.4~ngly-606
+    ./upgrade.py -c config.json -o /path/to/sysupgrade/.htaccess miauEnforce -d 1 2018.1.4~ngly-606
+
+### Configuration
+
+See ''config.json.example''.
 
 ## Available whitelist mechanisms
 
@@ -29,3 +33,12 @@ A mechanism meant to deploy mesh breaking technology changes. Only the leafs of
 the spanning tree are allowed to download firmware, which will remove them from
 the mesh network, but leaving any not upgraded node in the spanning tree.
 
+
+## LogRead
+
+A simple logging parser and reader. Is able to parse a special log output format, only.
+We, Freifunk Kiel, have the following format option in our Apache 2.4 configuration:
+
+    LogFormat "%h \"%r\" %>s %b" firmware
+	  CustomLog ${APACHE_LOG_DIR}/firmware.log firmware
+  
