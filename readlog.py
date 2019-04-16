@@ -4,7 +4,7 @@ import click
 import attr
 from pathlib import Path
 
-def parse_logline(line):
+def parse_logline(line,with_manifest = False):
     try:
         fields = line.split()
         if len(fields) < 5:
@@ -17,7 +17,8 @@ def parse_logline(line):
             if path.parent.name == "sysupgrade":
                 branch = path.parent.parent.name
                 if path.suffix == ".manifest":
-                    print(address,"manifest",branch)
+                    if with_manifest:
+                        print(address,"manifest",branch)
                 else:
                     filename = path.name
                     print(address,"firmware",branch,filename)
@@ -26,13 +27,14 @@ def parse_logline(line):
         pass
 
 @click.command()
+@click.option("--with-manifest/--without-manifest",default=False,help="Output manifest requests")
 @click.argument("logfile",type=click.File(mode='r+'))
-def cli(logfile):
+def cli(with_manifest,logfile):
     print("Start reading")
     while True:
         line = logfile.readline()
         if line is not None and len(line) > 0:
-            parse_logline(line)
+            parse_logline(line,with_manifest)
         else:
             exit(1)
 
