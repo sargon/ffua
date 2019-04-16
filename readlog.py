@@ -49,7 +49,9 @@ def parse_logline(line,with_manifest = False):
 @click.option('--config','-c','config_file',type=click.File(mode='r'),prompt=True)
 @click.pass_context
 def cli(ctx,config_file):
-    ctx.obj['config'] = ffua.config.Config(config_file)
+    config = ffua.config.Config()
+    config.load(config_file) 
+    ctx.obj['config'] =  config
 
 
 @cli.command()
@@ -62,12 +64,35 @@ def parse(with_manifest,logfiles):
             if request is not None:
                 print(request.source,request.type,request.branch,request.filename)
 
+def find_node_from_address(graph,address):
+    for node in graph.getNodes():
+        nodedata = node.data
+        if nodedata is None:
+            continue
+        if 'nodeinfo' in nodedata:
+            if 'network' in nodedata['nodeinfo']:
+                if 'addresses' in nodedata['nodeinfo']['network']:
+                    if address in nodedata['nodeinfo']['network']['addresses']:
+                        return node
+    return None
+
 @cli.command()
 @click.argument("logfiles",type=click.File(mode='r+'),nargs=-1)
 @click.pass_context
-def verify(logfiles):
-    graph = ffua.graph.getDataFromHopGlass(hopglass)
-
+def verify(ctx,logfiles):
+    config = ctx.obj['config']
+    graph = ffua.hopglass.getDataFromHopGlass(config.hopglass)
+    # Add magic starting node
+    # Remove none connected nodes from graph
+    for logfile in logfiles:
+        for request in parse_logfile(logfile):
+            if request is not None:
+                node = find_node_from_address(graph,request.address)
+                if node is not None:
+                    # delete node from graph
+                    # check if graph is still connected
+                    # if check fails, raise Exception
+        
 
 if __name__ == "__main__":
     cli(obj=dict())
