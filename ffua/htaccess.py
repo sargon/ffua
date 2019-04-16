@@ -7,7 +7,7 @@ def htAllowNode(node,output):
     for address in node['nodeinfo']['network']['addresses']:
         print(f"allow from { address }",file=output)
 
-def generateHtAccessRules(generator,output):
+def generateHtAccessRules(generator,nets,output):
     
     print("order deny,allow",file=output)
     num = 0
@@ -17,5 +17,9 @@ def generateHtAccessRules(generator,output):
             num = num + 1
         except:
             pass
-    print("deny from all",file=output)
+    if len(nets) == 0:
+        print("deny from all",file=output)
+    else:
+        for net in nets:
+            print(f"deny from { net }",file=output)
     print(f"#Allowed nodes: { num }",file=output)

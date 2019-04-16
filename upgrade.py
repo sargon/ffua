@@ -68,7 +68,7 @@ def otiu(ctx):
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
     generator = outerToInnerUpgrade(graph, tree)
-    generateHtAccessRules(generator, ctx.obj['output'])
+    generateHtAccessRules(generator, ctx.obj['config'].nets, ctx.obj['output'])
 
 if __name__ == "__main__":
     cli(obj={})
