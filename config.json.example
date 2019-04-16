@@ -12,5 +12,8 @@
   "firmware_path": "/opt/firmware/",
   "branches": [
     "stable"
+  ],
+  "nets": [
+    "fda1:384a:74de:4242::/64"
   ]
 }

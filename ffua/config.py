@@ -1,4 +1,5 @@
 import attr
+import ipaddress
 import json
 from pathlib import Path
 
@@ -10,6 +11,7 @@ class Config:
     startnodes = attr.ib(factory=list)
     firmware_path = attr.ib(default=Path("/opt/firmware/"))
     branches = attr.ib(factory=dict)
+    nets = attr.ib(factory=list)
 
     def load(self,config_file):
         config = json.load(config_file)
@@ -28,6 +30,9 @@ class Config:
         else:
             for branch in config['branches']:
                 self.branches[branch] = parse_manifest(self.firmware_path / branch / "sysupgrade" / f"{ branch }.manifest")
+        if "nets" in config:
+            map(ipaddress.ip_network, config["nets"])
+            self.nets = config["nets"]
 
 
     def get_branch(self,branch):
