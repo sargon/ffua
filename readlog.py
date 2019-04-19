@@ -108,6 +108,16 @@ def verify(ctx,logfiles):
                     logging.info(f"Upgrade {request.branch} on {node_id}:{ getHostname(node)}")
                     graph.removeNode(node_id)
                     # check if graph is still connected
+                    components = ffua.graph.getComponents(graph)
+                    if len(components) > 1:
+                        logging.warning("Graph is disconnected")
+                        disconnected = filter(lambda component: graph_center not in component,components)
+                        for dis_component in disconnected:
+                            for dis_node_id in dis_component:
+                                dis_node = graph.getNode(dis_node_id)
+                                logging.warning(f"Disconnect {dis_node_id}:{ getHostname(dis_node) }")
+                                graph.removeNode(dis_node_id)
+
                     # if check fails, report disconnected nodes
         
 
