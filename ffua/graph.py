@@ -16,6 +16,9 @@ class Graph:
 
         def degree(self):
             return len(self.arrows_in) + len(self.arrows_out)
+
+        def isNeighbor(self,node_id):
+            return node_id in self.arrows_out or node_id in self.arrows_in
     
     nodes = attr.ib(factory=dict)
     identmap = attr.ib(factory=dict)
