@@ -2,6 +2,6 @@
 pkgs.mkShell {
   buildInputs = with pkgs; [
     ( python3.withPackages (ps: with ps;
-    [ requests attrs click ]))
+    [ requests attrs click pytest ]))
     ];
 }
