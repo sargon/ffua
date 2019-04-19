@@ -9,6 +9,9 @@ class Branch:
     has_factory = attr.ib(type=bool)
     sysupgrade_manifest = attr.ib(type=Manifest,default=None)
 
+    def getSysupgradePath(self):
+        return self.path / "sysupgrade"
+
     @classmethod
     def from_path(cls,path):
         # The important stuff
