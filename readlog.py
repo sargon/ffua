@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import click
 import attr
-from pathlib import Path
+import click
 from enum import auto,Enum
+import logging
+from pathlib import Path
 
 import ffua
 
@@ -52,6 +53,7 @@ def cli(ctx,config_file):
     config = ffua.config.Config()
     config.load(config_file) 
     ctx.obj['config'] =  config
+    logging.basicConfig(level=logging.WARNING)
 
 
 @cli.command()
@@ -66,7 +68,7 @@ def parse(with_manifest,logfiles):
 
 def find_node_from_address(graph,address):
     for node in graph.getNodes():
-        nodedata = node.data
+        nodedata = graph.getNode(node).data
         if nodedata is None:
             continue
         if 'nodeinfo' in nodedata:
@@ -81,17 +83,27 @@ def find_node_from_address(graph,address):
 @click.pass_context
 def verify(ctx,logfiles):
     config = ctx.obj['config']
+    logging.info("Get graph data")
     graph = ffua.hopglass.getDataFromHopGlass(config.hopglass)
+    graph_center = ffua.graph.addVirtualNode(graph,config.startnodes)
     # Add magic starting node
     # Remove none connected nodes from graph
     for logfile in logfiles:
         for request in parse_logfile(logfile):
             if request is not None:
-                node = find_node_from_address(graph,request.address)
-                if node is not None:
+                nodeid = find_node_from_address(graph,request.source)
+                if nodeid is None:
+                    logging.warning(f"Node for {request.source} not found")
+                else:
+                    node = graph.getNode(nodeid)
+                    hostname = "<?>"
+                    if 'hostname' in node.data['nodeinfo']:
+                        hostname = node.data['nodeinfo']['hostname']
                     # delete node from graph
+                    logging.info(f"Upgrade {request.branch} on {nodeid}:{hostname}")
+                    graph.removeNode(nodeid)
                     # check if graph is still connected
-                    # if check fails, raise Exception
+                    # if check fails, report disconnected nodes
         
 
 if __name__ == "__main__":

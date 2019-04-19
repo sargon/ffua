@@ -34,6 +34,15 @@ class Graph:
             self.nodes[node] = self.GraphNode()
         return self.nodes[node]
 
+    def removeNode(self,node):
+        if node in self.nodes:
+            gnode = self.nodes[node]
+            for neighbor in gnode.arrows_out:
+                del self.nodes[neighbor].arrows_in[node]
+            for neighbor in gnode.arrows_in:
+                del self.nodes[neighbor].arrows_out[node]
+            del self.nodes[node]
+
     def getNodes(self):
         return self.nodes.keys()
     
