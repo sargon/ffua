@@ -17,6 +17,45 @@ class Manifest:
             versions[target.version] = None
         return list(versions.keys())
 
+    @classmethod
+    def from_path(cls,manifest_path):
+        manifest = cls(manifest_path)
+
+        def getFirmware(target):
+            if target in manifest.targets:
+                firmware = manifest.targets[target]
+            else:
+                firmware = Firmware(target)
+                manifest.targets[target] = firmware
+            return firmware
+
+        with manifest.path.open('r') as f:
+            for line in f:
+                line = line.rstrip()
+                if line.startswith("BRANCH="):
+                    manifest.branch = line[7:]
+                elif line.startswith("PRIORITY="):
+                    manifest.priority = int(line[9:])
+                elif line.startswith("DATE="):
+                    # manifest.date = ...
+                    pass
+                else:
+                    parts = line.split(" ")
+                    if len(parts) >= 4:
+                        firmware = getFirmware(parts[0])
+                        firmware.version = parts[1]
+                        if len(parts[2]) == 64:
+                            firmware.sha256 = parts[2]
+                        elif len(parts[2]) == 128:
+                            firmware.sha512 = parts[2]
+                    if len(parts) == 4:
+                        firmware.filename = parts[3]
+                    if len(parts) == 5:
+                        firmware.filesize = parts[3]
+                        firmware.filename = parts[4]
+
+        return manifest
+
 @attr.s
 class Firmware:
     target  = attr.ib(type=str)
@@ -27,39 +66,4 @@ class Firmware:
     filesize = attr.ib(type=str,default=None)
 
 def parse_manifest(manifest_path):
-    manifest = Manifest(Path(manifest_path))
-
-    def getFirmware(target):
-        if target in manifest.targets:
-            firmware = manifest.targets[target]
-        else:
-            firmware = Firmware(target)
-            manifest.targets[target] = firmware
-        return firmware
-
-    with manifest.path.open('r') as f:
-        for line in f:
-            line = line.rstrip()
-            if line.startswith("BRANCH="):
-                manifest.branch = line[7:]
-            elif line.startswith("PRIORITY="):
-                manifest.priority = int(line[9:])
-            elif line.startswith("DATE="):
-                # manifest.date = ...
-                pass
-            else:
-                parts = line.split(" ")
-                if len(parts) >= 4:
-                    firmware = getFirmware(parts[0])
-                    firmware.version = parts[1]
-                    if len(parts[2]) == 64:
-                        firmware.sha256 = parts[2]
-                    elif len(parts[2]) == 128:
-                        firmware.sha512 = parts[2]
-                if len(parts) == 4:
-                    firmware.filename = parts[3]
-                if len(parts) == 5:
-                    firmware.filesize = parts[3]
-                    firmware.filename = parts[4]
-
-    return manifest
+    return Manifest.from_path(Path(manifest_path))
