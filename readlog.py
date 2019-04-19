@@ -47,13 +47,17 @@ def parse_logline(line,with_manifest = False):
         return None
 
 @click.group()
+@click.option("--debug/--no-debug",default=False,help="Debugging output")
 @click.option('--config','-c','config_file',type=click.File(mode='r'),prompt=True)
 @click.pass_context
-def cli(ctx,config_file):
+def cli(ctx,debug,config_file):
     config = ffua.config.Config()
-    config.load(config_file) 
+    config.load(config_file)
     ctx.obj['config'] =  config
-    logging.basicConfig(level=logging.WARNING)
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
 
 @cli.command()
@@ -85,17 +89,27 @@ def verify(ctx,logfiles):
 
     def getHostname(node):
         hostname = "<?>"
-        if 'hostname' in node.data['nodeinfo']:
+        try:
             hostname = node.data['nodeinfo']['hostname']
-        return hostname
+        finally:
+            return hostname
 
+    def getBranch(node):
+        branch = "<?>"
+        try:
+            branch = node.data['nodeinfo']['software']['autoupdater']['branch']
+        finally:
+            return branch
 
     config = ctx.obj['config']
     logging.info("Get graph data")
     graph = ffua.hopglass.getDataFromHopGlass(config.hopglass)
     # Add magic starting node
     graph_center = ffua.graph.addVirtualNode(graph,config.startnodes)
+    center_node = graph.getNode(graph_center)
     # Remove none connected nodes from graph
+    print("Start verification process")
+    success = True
     for logfile in logfiles:
         for request in parse_logfile(logfile):
             if request is not None:
@@ -110,16 +124,31 @@ def verify(ctx,logfiles):
                     # check if graph is still connected
                     components = ffua.graph.getComponents(graph)
                     if len(components) > 1:
-                        logging.warning("Graph is disconnected")
+                        logging.warning(f"Remove of ({getBranch(node)}) {node_id}:{ getHostname(node) } disconnects graph")
                         disconnected = filter(lambda component: graph_center not in component,components)
+                        success = False
                         for dis_component in disconnected:
                             for dis_node_id in dis_component:
                                 dis_node = graph.getNode(dis_node_id)
-                                logging.warning(f"Disconnect {dis_node_id}:{ getHostname(dis_node) }")
+                                logging.warning(f"Disconnect ({getBranch(node)}) {dis_node_id}:{ getHostname(dis_node) }")
                                 graph.removeNode(dis_node_id)
 
                     # if check fails, report disconnected nodes
-        
+    print("Verfication ended")
+    if success:
+        print("No graph split detected")
+    else:
+        print("WARNING: Graph split was detected")
+    if graph.numNodes() > 1 + center_node.degree():
+        print(f"There are { graph.numNodes() - 1 - center_node.degree() } nodes still in the graph")
+        for node_id in graph.getNodes():
+            if not center_node.isNeighbor(node_id) and node_id != graph_center:
+                node = graph.getNode(node_id)
+                if node.data is None:
+                    print(node.ident)
+                else:
+                    print(f" Node ({getBranch(node)}) {node_id}:{ getHostname(node) }")
+
 
 if __name__ == "__main__":
     cli(obj=dict())
