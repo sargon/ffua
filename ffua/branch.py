@@ -1,16 +1,22 @@
 import attr
 from pathlib import Path
 
-from ffua.manifest import parse_manifest,Manifest
+from ffua.manifest import Manifest
 
 @attr.s
 class Branch:
     path = attr.ib(type=Path)
     has_factory = attr.ib(type=bool)
-    sysupgrade_manifest = attr.ib(type=Manifest,default=None)
+    manifest = attr.ib(type=Manifest,default=None)
 
     def getSysupgradePath(self):
         return self.path / "sysupgrade"
+
+    def getManifest(self):
+        return self.manifest
+
+    def getFirmwareVersion(self):
+        return self.manifest.getFirmwareVersion()
 
     @classmethod
     def from_path(cls,path):

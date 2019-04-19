@@ -8,7 +8,7 @@ import click
 from ffua.graph import spantree, addVirtualNode
 from ffua.hopglass import getDataFromHopGlass
 from ffua.mechanism import outerToInnerUpgrade, miauEnforce
-from ffua.htaccess import generateHtAccessRules, generateHtAccessRulesForBranches
+from ffua.htaccess import generateHtAccessRulesForBranches
 from ffua.config import Config
 
 @click.group()
@@ -40,14 +40,14 @@ def cli(ctx, output, config_file):
 @click.option("--min-distance", "-d", type=click.INT, default=2)
 @click.pass_context
 def miau(ctx, min_distance):
-    firmware = [ (name,mfst.sysupgrade_manifest.getFirmwareVersion().pop()) for name,mfst in ctx.obj['config'].branches.items()]
+    firmware = [ (name,mfst.getFirmwareVersion().pop()) for name,mfst in ctx.obj['config'].branches.items()]
     print(f"#Tracking firmware version: { firmware }", file=ctx.obj['output'])
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
     if ctx.obj['virtual_rootnode']:
         min_distance += 1
     generator = miauEnforce(graph, tree, firmware, min_distance)
-    generateHtAccessRules(generator, ctx.obj['config'].nets, ctx.obj['output'])
+    generateHtAccessRulesForBranches(generator, ctx.obj['config'])
 
 @cli.command(name="outerToInnerUpgrade")
 @click.pass_context
