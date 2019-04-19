@@ -5,7 +5,7 @@ import sys
 
 import click
 
-from ffua.graph import spantree
+from ffua.graph import spantree, addVirtualNode
 from ffua.hopglass import getDataFromHopGlass
 from ffua.manifest import parse_manifest
 from ffua.mechanism import outerToInnerUpgrade, miauEnforce
@@ -26,18 +26,7 @@ def cli(ctx, output, config_file):
     graph = getDataFromHopGlass(hopglass)
     if len(startnode) > 1:
         # Construct virtual node and add a link to all startnodes.
-        startident = graph.numNodes()
-        graph.setNodeIdent(startident, "_VIRTUAL")
-        num = 0
-        for sn in startnode:
-            try:
-                nodeid = graph.getGraphIdentFromIdent(sn)
-                graph.addEdge(startident, nodeid, [])
-                num += 1
-            except:
-                logging.warning(f"Node { sn } node found in network graph")
-        if num == 0:
-            raise Exception("No available startnode given")
+        startnode = addVirtualNode(graph,startnode)
         ctx.obj['virtual_rootnode'] = True
     else:
         startident = graph.getGraphIdentFromIdent(startnode[0])

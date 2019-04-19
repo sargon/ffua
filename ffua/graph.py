@@ -100,3 +100,19 @@ def getLeafs(tree):
         if tree.getNode(node).degree() == 1:
             leafs.append(node)
     return leafs
+
+def addVirtualNode(graph,neighbors):
+    virtual_id = graph.numNodes()
+    graph.setNodeIdent(virtual_id, "_VIRTUAL")
+    num = 0
+    for neighbor in neighbors:
+        try:
+            nodeid = graph.getGraphIdentFromIdent(neighbor)
+            graph.addEdge(virtual_id, nodeid, [])
+            num += 1
+        except:
+            logging.warning(f"Node { neighbor } node found in network graph")
+    if num == 0:
+        raise Exception("No available neighbors given")
+    else:
+        return virtual_id
