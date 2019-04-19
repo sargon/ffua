@@ -82,26 +82,31 @@ def find_node_from_address(graph,address):
 @click.argument("logfiles",type=click.File(mode='r+'),nargs=-1)
 @click.pass_context
 def verify(ctx,logfiles):
+
+    def getHostname(node):
+        hostname = "<?>"
+        if 'hostname' in node.data['nodeinfo']:
+            hostname = node.data['nodeinfo']['hostname']
+        return hostname
+
+
     config = ctx.obj['config']
     logging.info("Get graph data")
     graph = ffua.hopglass.getDataFromHopGlass(config.hopglass)
-    graph_center = ffua.graph.addVirtualNode(graph,config.startnodes)
     # Add magic starting node
+    graph_center = ffua.graph.addVirtualNode(graph,config.startnodes)
     # Remove none connected nodes from graph
     for logfile in logfiles:
         for request in parse_logfile(logfile):
             if request is not None:
-                nodeid = find_node_from_address(graph,request.source)
-                if nodeid is None:
-                    logging.warning(f"Node for {request.source} not found")
+                node_id = find_node_from_address(graph,request.source)
+                if node_id is None:
+                    logging.debug(f"Node for {request.source} not found")
                 else:
-                    node = graph.getNode(nodeid)
-                    hostname = "<?>"
-                    if 'hostname' in node.data['nodeinfo']:
-                        hostname = node.data['nodeinfo']['hostname']
+                    node = graph.getNode(node_id)
                     # delete node from graph
-                    logging.info(f"Upgrade {request.branch} on {nodeid}:{hostname}")
-                    graph.removeNode(nodeid)
+                    logging.info(f"Upgrade {request.branch} on {node_id}:{ getHostname(node)}")
+                    graph.removeNode(node_id)
                     # check if graph is still connected
                     # if check fails, report disconnected nodes
         
