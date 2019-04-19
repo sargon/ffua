@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from ffua.manifest import parse_manifest
+from ffua.branch import recurse_firmware_directory
 
 @attr.s
 class Config:
@@ -25,11 +26,16 @@ class Config:
             raise Exception("Missing startnodes in config")
         if "firmware_path" in config:
             self.firmware_path = Path(config['firmware_path'])
+            branches = dict(recurse_firmware_directory(self.firmware_path))
         if "branches" not in config:
-            self.branches['stable'] = parse_manifest(self.firmware_path / "stable" / "sysupgrade" / "stable.manifest")
+            if "stable" in branches:
+                self.branches["stable"] = branches["stable"]
         else:
             for branch in config['branches']:
-                self.branches[branch] = parse_manifest(self.firmware_path / branch / "sysupgrade" / f"{ branch }.manifest")
+                if branch in branches:
+                    self.branches[branch] = branches[branch]
+                else:
+                    raise Exception(f"Configured branch '{branch}' not found")
         if "nets" in config:
             map(ipaddress.ip_network, config["nets"])
             self.nets = config["nets"]
