@@ -46,6 +46,11 @@ class Graph:
 
     def getNodes(self):
         return self.nodes.keys()
+
+    def getEdges(self):
+        for node in self.nodes.keys():
+            for neighbor in self.getNode(node).arrows_out:
+                yield (node,neighbor)
     
     def setNodeData(self,node,data):
         self.getNode(node).data = data 
