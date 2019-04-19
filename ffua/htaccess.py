@@ -7,7 +7,14 @@ def htAllowNode(node,output):
     for address in node['nodeinfo']['network']['addresses']:
         print(f"allow from { address }",file=output)
 
-def generateHtAccessRules(generator,nets,output):
+def generateHtAccessRulesForBranches(generator,config):
+    generator = list(generator)
+    for branch in config.branches.values():
+        htaccess_path = branch.getSysupgradePath() / ".htaccess"
+        with open(htaccess_path,"w") as output:
+            generateHtAccessRules(generator, config.nets, output)
+
+def generateHtAccessRules(generator, nets, output):
     
     print("order deny,allow",file=output)
     num = 0
