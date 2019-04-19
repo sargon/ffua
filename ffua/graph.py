@@ -1,4 +1,5 @@
 import attr
+import logging
 
 @attr.s
 class Graph:
