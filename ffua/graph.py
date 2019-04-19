@@ -29,7 +29,7 @@ class Graph:
             return self.getNode(node).arrows_out
         except:
             return None
-
+    
     def getNode(self,node):
         if node not in self.nodes:
             self.nodes[node] = self.GraphNode()
@@ -122,3 +122,43 @@ def addVirtualNode(graph,neighbors):
         raise Exception("No available neighbors given")
     else:
         return virtual_id
+
+def getComponents(graph):
+    """
+    Disassemble the graph into its connectivity components.
+    """
+
+    def findComponent(components,node):
+        # Search existing components
+        for component in components:
+            if node in component:
+                return component
+        # None found return a new one
+        component = set()
+        component.add(node)
+        components.append(component)
+        return component
+
+    def joinComponents(components, comp1, comp2):
+        if comp1 is comp2:
+            # Already the same component
+            return
+        else:
+            comp1.update(comp2)
+            components.remove(comp2)
+
+
+    components = []
+    for src,dst in graph.getEdges():
+        sc = findComponent(components,src)
+        dc = findComponent(components,dst)
+        joinComponents(components,sc,dc)
+
+    return components
+
+def isConnectedTo(graph,node_id):
+    """
+    Checks if all nodes in the graph are connected to given node.
+    """
+    len(getComponents(graph)) == 1
+
