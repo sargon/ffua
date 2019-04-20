@@ -1,12 +1,12 @@
 import logging
 
 def htAllowNode(node,output):
-    print(f"# { node['nodeinfo']['hostname'] }",file=output)
-    print(f"# { node['nodeinfo']['software']['firmware']['release'] }",file=output)
-    if "autoupdater" in node['nodeinfo']['software']:
-        if "branch" in node['nodeinfo']['software']['autoupdater']:
-            print(f"# { node['nodeinfo']['software']['autoupdater']['branch'] }",file=output)
-    for address in node['nodeinfo']['network']['addresses']:
+    print(f"# { node.getHostname() }",file=output)
+    print(f"# { node.getFirmwareVersion() }",file=output)
+    branch = node.getBranch()
+    if branch is not None:
+        print(f"# { branch }",file=output)
+    for address in node.getAddresses():
         print(f"allow from { address }",file=output)
 
 def generateHtAccessRulesForBranches(generator,config):

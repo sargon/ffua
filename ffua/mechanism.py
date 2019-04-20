@@ -8,12 +8,12 @@ def outerToInnerUpgrade(graph,tree):
     """
 
     def has_active_childs(node):
+        now = datetime.utcnow()
         for gchild,_ in tree.getOutEdges(node).items():
-            child = graph.getNodeData(gchild)
-            lastseen =  datetime.strptime(child['lastseen'][0:18],"%Y-%m-%dT%H:%M:%S")
-            now = datetime.utcnow()
-            if now - lastseen < timedelta(minutes=30):
-                return True
+            lastseen = graph.getNodeData(gchild).getLastSeen()
+            if lastseen is not None:
+                if now - lastseen < timedelta(minutes=30):
+                    return True
         return False
     
     for node in tree.getNodes():
@@ -34,6 +34,7 @@ def miauEnforce(graph,tree,targetfirmwares,min_distance=2):
     """
 
     targetversions = [ v for _,v in targetfirmwares ]
+    targetbranches = [ b for b,_ in targetfirmwares ]
 
     for node in tree.getNodes():
         distance = tree.getNodeData(node)
@@ -42,12 +43,12 @@ def miauEnforce(graph,tree,targetfirmwares,min_distance=2):
             if distance <= min_distance:
                 yield nodedata
             elif distance > min_distance:
-                version = nodedata['nodeinfo']['software']['firmware']['release']
+                version = nodedata.getFirmwareVersion()
                 if version in targetversions:
                     yield nodedata
                     continue
-                branch = node['nodeinfo']['software']['autoupdater']['branch']
-                if branch not in [ b for b, _ in targetversions ]:
+                branch = nodedata.getBranch()
+                if branch not in targetbranches:
                     yield nodedata
         except Exception as e:
             logging.exception(e)

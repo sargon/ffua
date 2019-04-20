@@ -51,13 +51,14 @@ def parse_logline(line,with_manifest = False):
 @click.option('--config','-c','config_file',type=click.File(mode='r'),prompt=True)
 @click.pass_context
 def cli(ctx,debug,config_file):
-    config = ffua.config.Config()
-    config.load(config_file)
-    ctx.obj['config'] =  config
     if debug:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
+
+    config = ffua.config.Config()
+    config.load(config_file)
+    ctx.obj['config'] =  config
 
 
 @cli.command()
@@ -71,35 +72,17 @@ def parse(with_manifest,logfiles):
                 print(request.source,request.type,request.branch,request.filename)
 
 def find_node_from_address(graph,address):
-    for node in graph.getNodes():
-        nodedata = graph.getNodeData(node)
-        if nodedata is None:
-            continue
-        if 'nodeinfo' in nodedata:
-            if 'network' in nodedata['nodeinfo']:
-                if 'addresses' in nodedata['nodeinfo']['network']:
-                    if address in nodedata['nodeinfo']['network']['addresses']:
-                        return node
-    return None
+    nodes_data = map(lambda node_id: (node_id,graph.getNodeData(node_id)),graph.getNodes())
+    nodes_data = filter(lambda data: data[1] is not None,nodes_data)
+    try:
+        return next(filter(lambda node_data: address in node_data[1].getAddresses(),nodes_data))
+    except StopIteration:
+        return (None,None)
 
 @cli.command()
 @click.argument("logfiles",type=click.File(mode='r+'),nargs=-1)
 @click.pass_context
 def verify(ctx,logfiles):
-
-    def getHostname(node_data):
-        hostname = "<?>"
-        try:
-            hostname = node_data['nodeinfo']['hostname']
-        finally:
-            return hostname
-
-    def getBranch(node_data):
-        branch = "<?>"
-        try:
-            branch = node_data['nodeinfo']['software']['autoupdater']['branch']
-        finally:
-            return branch
 
     config = ctx.obj['config']
     logging.info("Get graph data")
@@ -112,24 +95,23 @@ def verify(ctx,logfiles):
     for logfile in logfiles:
         for request in parse_logfile(logfile):
             if request is not None:
-                node_id = find_node_from_address(graph,request.source)
+                (node_id,node_data) = find_node_from_address(graph,request.source)
                 if node_id is None:
                     logging.debug(f"Node for {request.source} not found")
                 else:
-                    node_data = graph.getNodeData(node_id)
                     # delete node from graph
-                    logging.info(f"Upgrade {request.branch} on {node_id}:{ getHostname(node_data)}")
+                    logging.info(f"Upgrade {request.branch} on {node_id}:{ node_data.getHostname() }")
                     graph.removeNode(node_id)
                     # check if graph is still connected
                     components = ffua.graph.getComponents(graph)
                     if len(components) > 1:
-                        logging.warning(f"Remove of ({getBranch(node_data)}) {node_id}:{ getHostname(node_data) } disconnects graph")
+                        logging.warning(f"Remove of ({ node_data.getBranch() }) { node_id }:{ node_data.getHostname() } disconnects graph")
                         disconnected = filter(lambda component: graph_center not in component,components)
                         success = False
                         for dis_component in disconnected:
                             for dis_node_id in dis_component:
                                 dis_node_data = graph.getNodeData(dis_node_id)
-                                logging.warning(f"Disconnect ({getBranch(node_data)}) {dis_node_id}:{ getHostname(dis_node_data) }")
+                                logging.warning(f"Disconnect ({ node_data.getBranch() }) { dis_node_id }:{ dis_node_data.getHostname() }")
                                 graph.removeNode(dis_node_id)
 
                     # if check fails, report disconnected nodes
@@ -147,7 +129,7 @@ def verify(ctx,logfiles):
                 if node.data is None:
                     print(node.ident)
                 else:
-                    print(f" Node ({getBranch(node.data)}) {node_id}:{ getHostname(node.data) }")
+                    print(f" Node ({ node.data.getBranch() }) { node_id }:{ node.data.getHostname() }")
 
 
 if __name__ == "__main__":

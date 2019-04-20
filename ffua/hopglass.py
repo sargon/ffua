@@ -1,5 +1,6 @@
 import requests
 from ffua.graph import Graph
+from ffua.node import NodeMetaData
 
 def getDataFromHopGlass(url):
     graphurl = url + "/graph.json"
@@ -27,7 +28,7 @@ def getDataFromHopGlass(url):
         for node in jgraph['batadv']['nodes']:
             if "node_id" in node:
                 node_id = node['node_id']
-                graph.setNodeData(cnt,nodemap[node_id])
+                graph.setNodeData(cnt,NodeMetaData(node_id,nodemap[node_id]))
                 graph.setNodeIdent(cnt,node_id)
             else:
                 node_id = node['id'].replace(':','')
