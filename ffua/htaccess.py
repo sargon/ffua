@@ -1,3 +1,5 @@
+import logging
+
 def htAllowNode(node,output):
     print(f"# { node['nodeinfo']['hostname'] }",file=output)
     print(f"# { node['nodeinfo']['software']['firmware']['release'] }",file=output)
@@ -22,8 +24,8 @@ def generateHtAccessRules(generator, nets, output):
         try:
             htAllowNode(nodedata,output)
             num = num + 1
-        except:
-            pass
+        except Exception as e:
+            logging.exception(e)
     if len(nets) == 0:
         print("deny from all",file=output)
     else:

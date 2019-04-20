@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 
 def outerToInnerUpgrade(graph,tree):
     """
@@ -22,8 +23,8 @@ def outerToInnerUpgrade(graph,tree):
                 yield nodedata
             elif not has_active_childs(node):
                 yield nodedata
-        except:
-            pass
+        except Exception as e:
+            logging.exception(e)
 
 def miauEnforce(graph,tree,targetfirmwares,min_distance=2):
     """
@@ -48,6 +49,6 @@ def miauEnforce(graph,tree,targetfirmwares,min_distance=2):
                 branch = node['nodeinfo']['software']['autoupdater']['branch']
                 if branch not in [ b for b, _ in targetversions ]:
                     yield nodedata
-        except:
-            pass
+        except Exception as e:
+            logging.exception(e)
 

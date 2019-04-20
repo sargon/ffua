@@ -12,10 +12,15 @@ from ffua.htaccess import generateHtAccessRulesForBranches
 from ffua.config import Config
 
 @click.group()
+@click.option("--debug/--no-debug",default=False,help="Debugging output")
 @click.option('--output', '-o', type=click.File(mode='w'), default=sys.stdout)
 @click.option('--config', '-c', 'config_file', type=click.File(mode='r'), prompt=True)
 @click.pass_context
-def cli(ctx, output, config_file):
+def cli(ctx, debug, output, config_file):
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     config = Config()
     config.load(config_file)
