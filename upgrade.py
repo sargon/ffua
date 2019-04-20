@@ -13,10 +13,9 @@ from ffua.config import Config
 
 @click.group()
 @click.option("--debug/--no-debug",default=False,help="Debugging output")
-@click.option('--output', '-o', type=click.File(mode='w'), default=sys.stdout)
 @click.option('--config', '-c', 'config_file', type=click.File(mode='r'), prompt=True)
 @click.pass_context
-def cli(ctx, debug, output, config_file):
+def cli(ctx, debug, config_file):
     if debug:
         logging.basicConfig(level=logging.DEBUG)
     else:
@@ -39,14 +38,12 @@ def cli(ctx, debug, output, config_file):
     ctx.obj['config'] = config
     ctx.obj['graph'] = graph
     ctx.obj['tree'] = tree
-    ctx.obj['output'] = output
 
 @cli.command(name="miauEnforce")
 @click.option("--min-distance", "-d", type=click.INT, default=2)
 @click.pass_context
 def miau(ctx, min_distance):
     firmware = [ (name,mfst.getFirmwareVersion().pop()) for name,mfst in ctx.obj['config'].branches.items()]
-    print(f"#Tracking firmware version: { firmware }", file=ctx.obj['output'])
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
     if ctx.obj['virtual_rootnode']:
