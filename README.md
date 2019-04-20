@@ -8,7 +8,7 @@ by applied whitelist mechanism.
 
 ### Example Execution
 
-    ./upgrade.py -c config.json -o /path/to/sysupgrade/.htaccess miauEnforce -d 1 2018.1.4~ngly-606
+    ./upgrade.py -c config.json miauEnforce -d 1 2018.1.4~ngly-606
 
 ### Configuration
 
@@ -18,7 +18,7 @@ See ''config.json.example''.
 
 ### miauEnforce
 
-    miauEnforce [--min-distance/-d <distance>] <firmware-version>   
+    miauEnforce [--min-distance/-d <distance>]
 
 A mechanism meant to verify miau enforced firmware deployment. Only nodes
 that are direct neighbors of the starting node or have the targeted firmware
@@ -36,9 +36,14 @@ the mesh network, but leaving any not upgraded node in the spanning tree.
 
 ## LogRead
 
-A simple logging parser and reader. Is able to parse a special log output format, only.
-We, Freifunk Kiel, have the following format option in our Apache 2.4 configuration:
+A simple logging parser and upgrade path verificaton utility. 
+Is able to parse a special log format, defined by the following
+Apache 2.4 configuration statements:
 
     LogFormat "%h \"%r\" %>s %b" firmware
 	  CustomLog ${APACHE_LOG_DIR}/firmware.log firmware
-  
+
+The verify command reads a given set of logs and verifies for each update that
+the network graph is still connected after removeing that updating node. This
+is mainly designed to verify the functionality of outerToInnerUpgrade for given
+configuration.
