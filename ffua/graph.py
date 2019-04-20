@@ -38,6 +38,12 @@ class Graph:
             self.nodes[node] = self.GraphNode()
         return self.nodes[node]
 
+    def getNodeData(self,node):
+        if node in self.nodes:
+            return self.nodes[node].data
+        else:
+            raise Exception(f"No such node { node }")
+
     def removeNode(self,node):
         if node in self.nodes:
             gnode = self.nodes[node]

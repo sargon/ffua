@@ -72,7 +72,7 @@ def parse(with_manifest,logfiles):
 
 def find_node_from_address(graph,address):
     for node in graph.getNodes():
-        nodedata = graph.getNode(node).data
+        nodedata = graph.getNodeData(node)
         if nodedata is None:
             continue
         if 'nodeinfo' in nodedata:
@@ -87,17 +87,17 @@ def find_node_from_address(graph,address):
 @click.pass_context
 def verify(ctx,logfiles):
 
-    def getHostname(node):
+    def getHostname(node_data):
         hostname = "<?>"
         try:
-            hostname = node.data['nodeinfo']['hostname']
+            hostname = node_data['nodeinfo']['hostname']
         finally:
             return hostname
 
-    def getBranch(node):
+    def getBranch(node_data):
         branch = "<?>"
         try:
-            branch = node.data['nodeinfo']['software']['autoupdater']['branch']
+            branch = node_data['nodeinfo']['software']['autoupdater']['branch']
         finally:
             return branch
 
@@ -106,7 +106,6 @@ def verify(ctx,logfiles):
     graph = ffua.hopglass.getDataFromHopGlass(config.hopglass)
     # Add magic starting node
     graph_center = ffua.graph.addVirtualNode(graph,config.startnodes)
-    center_node = graph.getNode(graph_center)
     # Remove none connected nodes from graph
     print("Start verification process")
     success = True
@@ -117,20 +116,20 @@ def verify(ctx,logfiles):
                 if node_id is None:
                     logging.debug(f"Node for {request.source} not found")
                 else:
-                    node = graph.getNode(node_id)
+                    node_data = graph.getNodeData(node_id)
                     # delete node from graph
-                    logging.info(f"Upgrade {request.branch} on {node_id}:{ getHostname(node)}")
+                    logging.info(f"Upgrade {request.branch} on {node_id}:{ getHostname(node_data)}")
                     graph.removeNode(node_id)
                     # check if graph is still connected
                     components = ffua.graph.getComponents(graph)
                     if len(components) > 1:
-                        logging.warning(f"Remove of ({getBranch(node)}) {node_id}:{ getHostname(node) } disconnects graph")
+                        logging.warning(f"Remove of ({getBranch(node_data)}) {node_id}:{ getHostname(node_data) } disconnects graph")
                         disconnected = filter(lambda component: graph_center not in component,components)
                         success = False
                         for dis_component in disconnected:
                             for dis_node_id in dis_component:
-                                dis_node = graph.getNode(dis_node_id)
-                                logging.warning(f"Disconnect ({getBranch(node)}) {dis_node_id}:{ getHostname(dis_node) }")
+                                dis_node_data = graph.getNodeData(dis_node_id)
+                                logging.warning(f"Disconnect ({getBranch(node_data)}) {dis_node_id}:{ getHostname(dis_node_data) }")
                                 graph.removeNode(dis_node_id)
 
                     # if check fails, report disconnected nodes
@@ -139,6 +138,7 @@ def verify(ctx,logfiles):
         print("No graph split detected")
     else:
         print("WARNING: Graph split was detected")
+    center_node = graph.getNode(graph_center)
     if graph.numNodes() > 1 + center_node.degree():
         print(f"There are { graph.numNodes() - 1 - center_node.degree() } nodes still in the graph")
         for node_id in graph.getNodes():
@@ -147,7 +147,7 @@ def verify(ctx,logfiles):
                 if node.data is None:
                     print(node.ident)
                 else:
-                    print(f" Node ({getBranch(node)}) {node_id}:{ getHostname(node) }")
+                    print(f" Node ({getBranch(node.data)}) {node_id}:{ getHostname(node.data) }")
 
 
 if __name__ == "__main__":
