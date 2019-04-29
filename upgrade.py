@@ -56,7 +56,7 @@ def miau(ctx, min_distance):
 def otiu(ctx):
     graph = ctx.obj['graph']
     tree = ctx.obj['tree']
-    generator = outerToInnerUpgrade(graph, tree)
+    generator = outerToInnerUpgrade(graph, tree,ctx.obj['config'].branches)
     generateHtAccessRulesForBranches(generator, ctx.obj['config'])
 
 if __name__ == "__main__":

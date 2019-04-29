@@ -1,17 +1,22 @@
 from datetime import datetime, timedelta
 import logging
 
-def outerToInnerUpgrade(graph,tree):
+def outerToInnerUpgrade(graph,tree,branches):
     """
     Allow updates only for the leafs of the spantree of the network graph.
     Except for the situation where every child of a node is inactive.
     """
 
+    fwv = map(lambda b: b.getFirmwareVersion().pop() ,branches.values())
+
     def has_active_childs(node):
         now = datetime.utcnow()
         for gchild,_ in tree.getOutEdges(node).items():
-            lastseen = graph.getNodeData(gchild).getLastSeen()
-            if lastseen is not None:
+            data = graph.getNodeData(gchild)
+            lastseen = data.getLastSeen()
+            if data.getFirmwareVersion() in fwv:
+                continue
+            elif lastseen is not None:
                 if now - lastseen < timedelta(minutes=30):
                     return True
         return False
