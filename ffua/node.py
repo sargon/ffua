@@ -24,7 +24,7 @@ class NodeMetaData:
 
     def getFirmwareVersion(self):
         try:
-            return node['nodeinfo']['software']['firmware']['release']
+            return self.raw['nodeinfo']['software']['firmware']['release']
         except:
             return None
 
