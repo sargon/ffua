@@ -1,4 +1,5 @@
 import attr
+import logging
 from pathlib import Path
 
 from ffua.manifest import Manifest
@@ -37,5 +38,8 @@ class Branch:
 
 def recurse_firmware_directory(firmware_path: Path):
     for branch_directory in firmware_path.iterdir():
-        yield (branch_directory.name,Branch.from_path(branch_directory))
+        try:
+            yield (branch_directory.name,Branch.from_path(branch_directory))
+        except Exception as e:
+            logging.exception(e)
 
