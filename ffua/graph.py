@@ -123,6 +123,8 @@ def addVirtualNode(graph,neighbors):
     for neighbor in neighbors:
         try:
             nodeid = graph.getGraphIdentFromIdent(neighbor)
+            data = graph.getNodeData(nodeid)
+            data.startnode = True
             graph.addEdge(virtual_id, nodeid, [])
             num += 1
         except:
