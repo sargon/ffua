@@ -87,6 +87,20 @@ class Graph:
         return len(self.nodes)
 
 
+def clone_graph(graph):
+    """
+    Clone the graph structure, nodedata is only referenced.
+    Edge weights are ignored.
+    """
+    clone = Graph()
+    for n1,n2 in graph.getEdges():
+        clone.addEdge(n1,n2,None)
+    for node in graph.nodes:
+        clone.setNodeData(node,graph.getNodeData(node))
+
+    return graph
+
+
 def spantree(graph,start):
     tree = Graph()
     if not graph.hasNode(start):
