@@ -9,12 +9,16 @@ def htAllowNode(node,output):
     for address in node.getAddresses():
         print(f"allow from { address }",file=output)
 
+def generateHtAccessRulesForBranch(branch,generator,config):
+    branch = config.branches[branch]
+    htaccess_path = branch.getSysupgradePath() / ".htaccess"
+    with open(htaccess_path,"w") as output:
+        generateHtAccessRules(generator, config.nets, output)
+
 def generateHtAccessRulesForBranches(generator,config):
     generator = list(generator)
-    for branch in config.branches.values():
-        htaccess_path = branch.getSysupgradePath() / ".htaccess"
-        with open(htaccess_path,"w") as output:
-            generateHtAccessRules(generator, config.nets, output)
+    for branch in config.branches:
+        generateHtAccessRulesForBranch(branch,generator,config)
 
 def generateHtAccessRules(generator, nets, output):
     
