@@ -24,10 +24,10 @@ class Branch:
         # The important stuff
         sysupgrade_path = path / "sysupgrade"
         if not sysupgrade_path.is_dir():
-            raise Exception("No valid branch directory - missing sysupgrade path.")
+            raise Exception(f"No valid branch directory { path } - missing sysupgrade path.")
         manifest_path = sysupgrade_path / (path.name + ".manifest")
         if not manifest_path.is_file():
-            raise Exception("No valid branch directory - missing sysupgrade manifest")
+            raise Exception(f"No valid branch directory { path } - missing sysupgrade manifest")
         manifest = Manifest.from_path(manifest_path)
         # The goodies
         factory_path = path / "factory"
