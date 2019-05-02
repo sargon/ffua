@@ -104,6 +104,37 @@ def spantree(graph,start):
                 nextnodes.append((target,weight+1))
     return tree
 
+
+def getTreeSubtrees(graph,tree,start):
+    """
+    Generates a list of childs which are connected.
+    to the starting center of the network. They are
+    the representatives of the subtrees.
+    """
+    childs = list(tree.getOutEdges(start).keys())
+    logging.debug(f"Starting childs: { childs }")
+    while len(childs) > 0:
+        child = childs.pop()
+        child_data = graph.getNodeData(child)
+        if child_data.isStartNode():
+            logging.debug(f"Node { child } is a starting node")
+            childs.extend(tree.getOutEdges(child).keys())
+        else:
+            yield child
+
+def getSubtreeNodes(tree,child):
+    """
+    Starting from child walks upwards in the graph, and returns
+    a stream of childs in the subtree.
+    """
+    childs = list(tree.getOutEdges(child).keys())
+    yield child
+
+    while len(childs) > 0:
+        cld = childs.pop()
+        childs.extend(tree.getOutEdges(cld).keys())
+        yield cld
+
 def getLeafs(tree):
     """
     Search for leafs in a graph, by the degree of nodes.
