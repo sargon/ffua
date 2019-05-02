@@ -5,6 +5,7 @@ import logging
 class NodeMetaData:
     ident = attr.ib(type=str)
     raw = attr.ib(factory=dict)
+    startnode = attr.ib(type=bool,default=False)
 
     def hasMetaData(self):
         return len(self.raw) > 0
@@ -14,6 +15,9 @@ class NodeMetaData:
             return self.raw['nodeinfo']['flags']['online']
         except:
             return False
+
+    def isStartNode(self):
+        return self.startnode
 
     def getBranch(self):
         try:
