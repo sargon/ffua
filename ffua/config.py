@@ -12,6 +12,7 @@ class Config:
     startnodes = attr.ib(factory=list)
     firmware_path = attr.ib(default=Path("/opt/firmware/"))
     branches = attr.ib(factory=dict)
+    incompatible = attr.ib(factory=dict)
     nets = attr.ib(factory=list)
 
     def load(self,config_file):
@@ -36,6 +37,14 @@ class Config:
                     self.branches[branch] = branches[branch]
                 else:
                     raise Exception(f"Configured branch '{branch}' not found")
+        if "incompatible" in config:
+            """
+            Build up list of incompatible branches.
+            """
+            self.incompatible = config['incompatible']
+            for branch in branches:
+                if branch not in self.incompatible:
+                    self.incompatible[branch] = list()
         if "nets" in config:
             map(ipaddress.ip_network, config["nets"])
             self.nets = config["nets"]
