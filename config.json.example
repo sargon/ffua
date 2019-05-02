@@ -11,8 +11,12 @@
   ],
   "firmware_path": "/opt/firmware/",
   "branches": [
-    "stable"
+    "stable",
+    "nightly"
   ],
+  "incompatible": {
+    "nightly": [ "stable","rc" ]
+  },
   "nets": [
     "fda1:384a:74de:4242::/64"
   ]
