@@ -13,6 +13,7 @@ class Config:
     firmware_path = attr.ib(default=Path("/opt/firmware/"))
     branches = attr.ib(factory=dict)
     incompatible = attr.ib(factory=dict)
+    mechanism = attr.ib(factory=dict)
     nets = attr.ib(factory=list)
 
     def load(self,config_file):
@@ -45,6 +46,8 @@ class Config:
             for branch in branches:
                 if branch not in self.incompatible:
                     self.incompatible[branch] = list()
+        if "mechansim" in config:
+            self.mechansim = config['mechansim']
         if "nets" in config:
             map(ipaddress.ip_network, config["nets"])
             self.nets = config["nets"]
