@@ -33,7 +33,7 @@ class OuterToInnerUpgrade(Mechanism):
     
     def __call__(self,graph,tree,branches):
 
-        fwv = map(lambda b: b.getFirmwareVersion().pop() ,branches.values())
+        fwv = list(map(lambda b: b.getFirmwareVersion().pop() ,branches.values()))
 
         for node in tree.getNodes():
             nodedata = graph.getNodeData(node)
@@ -65,7 +65,7 @@ class MiauEnforce(Mechanism):
 
     def __call__(self,graph,tree,branches):
 
-        targetversions = map(lambda b: b.getFirmwareVersion().pop() ,branches.values())
+        targetversions = list(map(lambda b: b.getFirmwareVersion().pop() ,branches.values()))
         targetbranches = branches.keys()
 
         for node in tree.getNodes():
