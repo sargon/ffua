@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 import logging
-import sys
 
 import click
-from ffua.graph import spantree, addVirtualNode, getSubtreeNodes, getTreeSubtrees, clone_graph
+from ffua.graph import spantree, addVirtualNode
 from ffua.hopglass import getDataFromHopGlass
 from ffua.mechanism import mechanismFactory, mechansim_dict
-from ffua.htaccess import generateHtAccessRulesForBranches, generateHtAccessRulesForBranch
+from ffua.htaccess import generateHtAccessRulesForBranch
 from ffua.config import Config
 from ffua.upgrade import UpgradeModel
 
