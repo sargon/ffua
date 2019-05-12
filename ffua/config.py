@@ -52,6 +52,15 @@ class Config:
             map(ipaddress.ip_network, config["nets"])
             self.nets = config["nets"]
 
-
     def get_branch(self,branch):
         return self.branches[branch]
+
+    def has_virtal_rootnode(self):
+        return len(self.startnodes) > 0
+
+    def get_mechansim(self,name):
+        base = { 'virtual_rootnode': self.has_virtal_rootnode() }
+        if name in self.mechanism:
+            return base.update(self.mechanism['name'])
+        else:
+            return base
