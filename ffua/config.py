@@ -49,7 +49,6 @@ class Config:
         if "mechansim" in config:
             self.mechansim = config['mechansim']
         if "nets" in config:
-            map(ipaddress.ip_network, config["nets"])
             self.nets = config["nets"]
 
     def get_branch(self,branch):
