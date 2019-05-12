@@ -52,6 +52,7 @@ class Graph:
             for neighbor in gnode.arrows_in:
                 del self.nodes[neighbor].arrows_out[node]
             del self.nodes[node]
+        assert node not in self.nodes
 
     def getNodes(self):
         return self.nodes.keys()
@@ -87,6 +88,11 @@ class Graph:
         return len(self.nodes)
 
 
+@attr.s
+class Tree(Graph):
+    root_node = attr.ib(default=None)
+
+
 def clone_graph(graph):
     """
     Clone the graph structure, nodedata is only referenced.
@@ -102,7 +108,8 @@ def clone_graph(graph):
 
 
 def spantree(graph,start):
-    tree = Graph()
+    tree = Tree()
+    tree.root_node = start
     if not graph.hasNode(start):
        raise Exception(f"Node {start} not in graph")
     tree.getNode(start)
@@ -119,13 +126,13 @@ def spantree(graph,start):
     return tree
 
 
-def getTreeSubtrees(graph,tree,start):
+def getTreeSubtrees(graph,tree):
     """
     Generates a list of childs which are connected.
     to the starting center of the network. They are
     the representatives of the subtrees.
     """
-    childs = list(tree.getOutEdges(start).keys())
+    childs = list(tree.getOutEdges(tree.root_node).keys())
     logging.debug(f"Starting childs: { childs }")
     while len(childs) > 0:
         child = childs.pop()
