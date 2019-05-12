@@ -17,6 +17,11 @@
   "incompatible": {
     "nightly": [ "stable","rc" ]
   },
+  "mechanism": {
+   "miauEnforce": {
+      "distance": 1
+    }
+  }
   "nets": [
     "fda1:384a:74de:4242::/64"
   ]
